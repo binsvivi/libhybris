@@ -701,30 +701,41 @@ void android_camera_set_preview_texture(CameraControl* control, int texture_id)
 	REPORT_FUNCTION();
 	assert(control);
 
+	if (texture_id == 0) {
+#if ANDROID_VERSION_MAJOR==4 && ANDROID_VERSION_MINOR<=3
+		control->camera->setPreviewTexture(NULL);
+#else
+		control->camera->setPreviewTarget(NULL);
+#endif
+		return;
+	}
+
 	static const bool allow_synchronous_mode = false;
 	static const bool is_controlled_by_app = true;
 
+	if (control->preview_texture == NULL || control->preview_texture_id != texture_id) {
 #if ANDROID_VERSION_MAJOR==4 && ANDROID_VERSION_MINOR<=3
-	android::sp<android::NativeBufferAlloc> native_alloc(
+		android::sp<android::NativeBufferAlloc> native_alloc(
 			new android::NativeBufferAlloc()
 			);
 #endif
 
 #if ANDROID_VERSION_MAJOR>=5
-	android::sp<android::IGraphicBufferProducer> producer;
-	android::sp<android::IGraphicBufferConsumer> consumer;
-	android::BufferQueue::createBufferQueue(&producer, &consumer);
+		android::sp<android::IGraphicBufferProducer> producer;
+		android::sp<android::IGraphicBufferConsumer> consumer;
+		android::BufferQueue::createBufferQueue(&producer, &consumer);
+		control->preview_bq = producer;
 #else
-	android::sp<android::BufferQueue> buffer_queue(
+		android::sp<android::BufferQueue> buffer_queue(
 #if ANDROID_VERSION_MAJOR==4 && ANDROID_VERSION_MINOR<=3
 			new android::BufferQueue(false, NULL, native_alloc)
 #else
 			new android::BufferQueue(NULL)
 #endif
 			);
+		control->preview_bq = buffer_queue;
 #endif
 
-	if (control->preview_texture == NULL) {
 #if ANDROID_VERSION_MAJOR==4 && ANDROID_VERSION_MINOR<=2
 		control->preview_texture = android::sp<android::SurfaceTexture>(
 				new android::SurfaceTexture(
@@ -751,6 +762,8 @@ void android_camera_set_preview_texture(CameraControl* control, int texture_id)
 					true,
 					is_controlled_by_app));
 #endif
+
+		control->preview_texture_id = texture_id;
 	}
 
 	control->preview_texture->setFrameAvailableListener(
@@ -761,11 +774,11 @@ void android_camera_set_preview_texture(CameraControl* control, int texture_id)
 #endif
 
 #if ANDROID_VERSION_MAJOR>=5
-	control->camera->setPreviewTarget(producer);
+	control->camera->setPreviewTarget(control->preview_bq);
 #elif ANDROID_VERSION_MAJOR==4 && ANDROID_VERSION_MINOR<=3
 	control->camera->setPreviewTexture(control->preview_texture->getBufferQueue());
 #else
-	control->camera->setPreviewTarget(buffer_queue);
+	control->camera->setPreviewTarget(control->preview_bq);
 #endif
 }
 
