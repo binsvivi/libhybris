@@ -47,7 +47,9 @@ int main(int argc, char** argv)
     MediaRecorderFactory::instantiate();
     // Enable audio recording for camera recording
     CameraRecordService::instantiate();
+#if ANDROID_VERSION_MAJOR<=5
     CameraService::instantiate();
+#endif
     ProcessState::self()->startThreadPool();
     IPCThreadState::self()->joinThreadPool();
 }
