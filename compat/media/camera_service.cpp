@@ -23,9 +23,7 @@
 #include "media_recorder_factory.h"
 #include "media_recorder.h"
 
-#if ANDROID_VERSION_MAJOR==5 && WANT_UBUNTU_CAMERA_HEADERS
 #include <media/camera_record_service.h>
-#endif
 
 #include <CameraService.h>
 
@@ -48,10 +46,10 @@ int main(int argc, char** argv)
     // for creating a new IMediaRecorder (MediaRecorder) instance over Binder
     MediaRecorderFactory::instantiate();
     // Enable audio recording for camera recording
-#if ANDROID_VERSION_MAJOR==5 && WANT_UBUNTU_CAMERA_HEADERS
     CameraRecordService::instantiate();
-#endif
+#if ANDROID_VERSION_MAJOR<=5
     CameraService::instantiate();
+#endif
     ProcessState::self()->startThreadPool();
     IPCThreadState::self()->joinThreadPool();
 }
