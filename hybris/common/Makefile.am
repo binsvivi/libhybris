@@ -25,6 +25,10 @@ if HAS_ANDROID_10_0_0
 SUBDIRS += q
 endif
 
+if HAS_ANDROID_11_0_0
+SUBDIRS += r
+endif
+
 libhybris_common_la_SOURCES = \
 	hooks.c \
 	hooks_shm.c \
@@ -96,6 +100,10 @@ libhybris_common_la_CPPFLAGS += -DWANT_LINKER_O
 endif
 if HAS_ANDROID_10_0_0
 libhybris_common_la_CPPFLAGS += -DWANT_LINKER_Q
+endif
+
+if HAS_ANDROID_11_0_0
+libhybris_common_la_CPPFLAGS += -DWANT_LINKER_R
 endif
 
 libhybris_common_la_CXXFLAGS = \
