@@ -34,7 +34,8 @@
 #include <stdint.h>
 #include <sys/cdefs-android.h>
 
-__LIBC_HIDDEN__ extern _Atomic(size_t) __libc_tls_generation_copy;
+//__LIBC_HIDDEN__ extern _Atomic(size_t) __libc_tls_generation_copy;
+__LIBC_HIDDEN__ extern size_t __libc_tls_generation_copy;
 
 struct TlsSegment {
   size_t size = 0;

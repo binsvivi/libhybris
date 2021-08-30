@@ -43,6 +43,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 #include "hybris_compat.h"
 
@@ -2789,6 +2790,15 @@ bool soinfo::relocate_relr() {
 // An empty list of soinfos
 static soinfo_list_t g_empty_list;
 
+#include<utility>
+
+template<typename T, typename... Ts>
+std::unique_ptr<T> make_unique(Ts&&... params)
+{
+	return std::unique_ptr<T>(new T(std::forward<Ts>(params)...));
+}
+
+
 bool soinfo::prelink_image() {
   if (flags_ & FLAG_PRELINKED) return true;
   /* Extract dynamic section */
@@ -2818,7 +2828,8 @@ bool soinfo::prelink_image() {
                                   &ARM_exidx, &ARM_exidx_count);
 #endif
 
-  /*TlsSegment tls_segment;
+  /* fix shabin*/
+  TlsSegment tls_segment;
   if (__bionic_get_tls_segment(phdr, phnum, load_bias, &tls_segment)) {
     if (!__bionic_check_tls_alignment(&tls_segment.alignment)) {
       if (!relocating_linker) {
@@ -2827,9 +2838,9 @@ bool soinfo::prelink_image() {
       }
       return false;
     }
-    tls_ = std::make_unique<soinfo_tls>();
+    tls_ = make_unique<soinfo_tls>();
     tls_->segment = tls_segment;
-  }*/
+  }
 
   // Extract useful information from dynamic section.
   // Note that: "Except for the DT_NULL element at the end of the array,

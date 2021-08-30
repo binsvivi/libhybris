@@ -45,6 +45,7 @@ r_la_SOURCES = \
 	rt.cpp \
         arch/arm_neon/linker_gnu_hash_neon.cpp \
 	bionic/libc/bionic/bionic_call_ifunc_resolver.cpp \
+	bionic/libc/bionic/bionic_elf_tls.cpp \
         arch/arm64/tlsdesc_resolver.S \
 	../strlcpy.c \
 	../strlcat.c
