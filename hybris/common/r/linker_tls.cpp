@@ -55,7 +55,7 @@ static size_t get_unused_module_index() {
   return g_tls_modules.size() - 1;
 }
 
-#if 0
+#if 1
 static void register_tls_module(soinfo* si, size_t static_offset) {
   TlsModules& libc_modules = __libc_shared_globals()->tls_modules;
 
@@ -75,16 +75,23 @@ static void register_tls_module(soinfo* si, size_t static_offset) {
     *libc_modules.generation_libc_so = new_generation;
   }
 
-  g_tls_modules[module_idx] = {
-    .segment = si_tls->segment,
-    .static_offset = static_offset,
-    .first_generation = new_generation,
-    .soinfo_ptr = si,
-  };
+ TlsModule tmp;
+ tmp.segment = si_tls->segment;
+ tmp.static_offset = static_offset;
+ tmp.first_generation = new_generation;
+ tmp.soinfo_ptr = si;
+
+ g_tls_modules[module_idx] = tmp;
+  //g_tls_modules[module_idx] = {
+  //  .segment = si_tls->segment,
+  //  .static_offset = static_offset,
+  //  .first_generation = new_generation,
+  //  .soinfo_ptr = si,
+  //};
 }
 #endif
 
-#if 0
+#if 1
 static void unregister_tls_module(soinfo* si) {
   ScopedSignalBlocker ssb;
   ScopedWriteLock locker(&__libc_shared_globals()->tls_modules.rwlock);
@@ -130,7 +137,7 @@ void linker_setup_exe_static_tls(const char* progname) {
 
 void linker_finalize_static_tls() {
   g_static_tls_finished = true;
- // __libc_shared_globals()->static_tls_layout.finish_layout();
+  __libc_shared_globals()->static_tls_layout.finish_layout();
 }
 
 void register_soinfo_tls(soinfo* si) {
@@ -141,9 +148,9 @@ void register_soinfo_tls(soinfo* si) {
   size_t static_offset = SIZE_MAX;
   if (!g_static_tls_finished) {
     StaticTlsLayout& layout = __libc_shared_globals()->static_tls_layout;
-   // static_offset = layout.reserve_solib_segment(si_tls->segment);
+    static_offset = layout.reserve_solib_segment(si_tls->segment);
   }
-  // register_tls_module(si, static_offset);
+   register_tls_module(si, static_offset);
 }
 
 void unregister_soinfo_tls(soinfo* si) {
@@ -151,5 +158,5 @@ void unregister_soinfo_tls(soinfo* si) {
   if (si_tls == nullptr || si_tls->module_id == kTlsUninitializedModuleId) {
     return;
   }
- // return unregister_tls_module(si);
+ return unregister_tls_module(si);
 }

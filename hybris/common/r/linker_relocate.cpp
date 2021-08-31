@@ -373,7 +373,8 @@ static bool process_relocation_impl(Relocator& relocator, const rel_t& reloc) {
       DL_ERR("%s COPY relocations are not supported", relocator.si->get_realpath());
       return false;
     case R_GENERIC_TLS_TPREL:
-#ifdef DISABLED_FOR_HYBRIS_SUPPORT
+//#ifdef DISABLED_FOR_HYBRIS_SUPPORT
+//#ifdef 1
       count_relocation_if<IsGeneral>(kRelocRelative);
       {
         ElfW(Addr) tpoff = 0;
@@ -396,10 +397,10 @@ static bool process_relocation_impl(Relocator& relocator, const rel_t& reloc) {
                     rel_target, reinterpret_cast<void*>(tpoff), sym_name);
         *static_cast<ElfW(Addr)*>(rel_target) = tpoff;
       }
-#else
-      fprintf(stderr, "TLS relocations not yet implemented in libhybris %s %d \n", __func__, __LINE__);
-      abort();
-#endif
+//#else
+//      fprintf(stderr, "TLS relocations not yet implemented in libhybris %s %d \n", __func__, __LINE__);
+//      abort();
+//#endif
       break;
     case R_GENERIC_TLS_DTPMOD:
 #ifdef DISABLED_FOR_HYBRIS_SUPPORT
